@@ -18,7 +18,7 @@ from graphix.measurements import Measurement, Outcome, PauliMeasurement, outcome
 from graphix.noise_models.depolarising import DepolarisingNoise, TwoQubitDepolarisingNoise
 from graphix.optimization import StandardizedPattern
 from graphix.sim.base_backend import Backend, Matrix
-from graphix.sim.statevec import Statevec
+from graphix.sim.statevec import Statevector
 from graphix.simulator import DefaultMeasureMethod
 from graphix.states import BasicStates, PlanarState, State
 from typing_extensions import assert_never, override
@@ -53,14 +53,14 @@ class BasicState(Enum):
     @staticmethod
     def try_from_statevector(sv: Matrix) -> BasicState | None:
         """Return the BasicState corresponding to the parameter, or not if it is not a basic state."""
-        return next((bs for bs in BasicState if np.all(bs.value.to_statevector() == sv)), None)
+        return next((bs for bs in BasicState if np.all(bs.value.to_statevector_numpy() == sv)), None)
 
     @staticmethod
     def try_from_state(s: State) -> BasicState | None:
         """Return the BasicState corresponding to the parameter, or not if it is not a basic state."""
         if isinstance(s, PlanarState):
             return next((bs for bs in BasicState if bs.value == s), None)
-        return BasicState.try_from_statevector(s.to_statevector())
+        return BasicState.try_from_statevector(s.to_statevector_numpy())
 
 
 BASIC_STATE_TO_CLIFFORD = {
@@ -250,7 +250,7 @@ class _AbstractStimBackend(Backend[stim.TableauSimulator]):
 
     @override
     def add_nodes(self, nodes: Sequence[int], data: Data = BasicStates.PLUS) -> None:
-        state = BasicState.try_from_statevector(Statevec(data).psi)
+        state = BasicState.try_from_statevector(Statevector(data).psi)
 
         if state is None:
             msg = f"Incorrect state value: stim can only prepare stabiliser states {data}."
@@ -372,7 +372,7 @@ def pattern_to_stim_circuit(  # noqa: C901,PLR0912,PLR0915
         if cmd.kind == CommandKind.N:
             basic_state_or_none = None if fixed_states is None else fixed_states.get(cmd.node)
             if basic_state_or_none is None:
-                basic_state_or_none = BasicState.try_from_statevector(Statevec(cmd.state).psi)
+                basic_state_or_none = BasicState.try_from_statevector(Statevector(cmd.state).psi)
                 if basic_state_or_none is None:
                     msg = f"Non-Pauli preparation: {cmd}"
                     raise ValueError(msg)

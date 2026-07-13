@@ -17,7 +17,7 @@ from graphix.optimization import StandardizedPattern
 from graphix.random_objects import rand_circuit
 from graphix.sim.base_backend import DenseState, Matrix, outer
 from graphix.sim.density_matrix import DensityMatrix
-from graphix.sim.statevec import Statevec
+from graphix.sim.statevec import Statevector
 from graphix.simulator import DefaultMeasureMethod
 from graphix.states import BasicStates
 from numpy.random import PCG64, Generator
@@ -41,17 +41,17 @@ def fidelity(u: Matrix, v: Matrix) -> float:
 
 def compare_backend_results(state1: DenseState, state2: DenseState) -> float:
     """Compute fidelity between two backend states."""
-    if isinstance(state1, Statevec) and isinstance(state2, Statevec):
+    if isinstance(state1, Statevector) and isinstance(state2, Statevector):
         return fidelity(state1.flatten(), state2.flatten())
     if isinstance(state1, DensityMatrix):
         dm1 = state1
-    elif isinstance(state1, Statevec):
+    elif isinstance(state1, Statevector):
         dm1 = DensityMatrix(state1)
     else:
         raise NotImplementedError
     if isinstance(state2, DensityMatrix):
         dm2 = state2
-    elif isinstance(state2, Statevec):
+    elif isinstance(state2, Statevector):
         dm2 = DensityMatrix(state2)
     else:
         raise NotImplementedError
@@ -147,7 +147,7 @@ def simulate_with_noise_model_to_density_matrix(pattern: Pattern, noise_model: N
     pattern.simulate_pattern(backend=backend, noise_model=noise_model)
     second_pattern = backend.to_pattern([], pattern.output_nodes)
     state = second_pattern.simulate_pattern()
-    assert isinstance(state, Statevec)
+    assert isinstance(state, Statevector)
     return outer(state.psi, state.psi.conj())
 
 
