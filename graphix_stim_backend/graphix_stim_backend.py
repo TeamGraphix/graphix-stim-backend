@@ -517,7 +517,7 @@ def presimulate_pauli(
     pauli_pattern, non_pauli_pattern = cut_pattern(pattern)
     backend = StimBackend(branch=branch)
     measure_method = DefaultMeasureMethod()
-    pauli_pattern.simulate_pattern(backend, measure_method=measure_method)
+    pauli_pattern.simulate(backend, measure_method=measure_method)
     output_node_set = set(pauli_pattern.output_nodes)
     input_nodes = [node for node in pattern.input_nodes if node in output_node_set]
     result_pattern = backend.to_pattern(input_nodes, non_pauli_pattern.input_nodes)
