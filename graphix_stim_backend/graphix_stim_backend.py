@@ -191,7 +191,7 @@ def get_renumbered_graph(pattern: Pattern) -> RenumberedGraph:
     :param pattern: pattern
     :return: the renumbering and the graph
     """
-    graph = pattern.graph()
+    graph = pattern.to_opengraph().graph
     nodes = list(graph.nodes())
     renumbering = {node: i for i, node in enumerate(graph.nodes())}
     renumbered_edges = [(renumbering[u], renumbering[v]) for (u, v) in graph.edges()]
