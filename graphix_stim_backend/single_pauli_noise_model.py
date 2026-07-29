@@ -36,7 +36,7 @@ class SinglePauliNoise(Noise):
         return 1
 
     @override
-    def to_kraus_channel(self) -> KrausChannel:
+    def to_krauschannel(self) -> KrausChannel:
         if self.error_type == "Z":
             return KrausChannel([KrausData(self.prob, Ops.Z)])
 
