@@ -58,7 +58,7 @@ def compare_backend_results(state1: DenseState, state2: DenseState) -> float:
     return fidelity(dm1.rho.flatten(), dm2.rho.flatten())
 
 
-def test_simple() -> None:
+def test_simple(fx_rng: Generator) -> None:
     """Test with simple pattern."""
     pattern = Pattern()
     pattern.add(command.N(0))
@@ -75,10 +75,10 @@ def test_simple() -> None:
     pbs = FixedBranchSelector(presimulated_pattern.results, RandomBranchSelector())
     # Instantiate the measure method to retrieve the measures of the non-Pauli nodes
     measure_method = DefaultMeasureMethod()
-    state = pattern.simulate(branch_selector=pbs, measure_method=measure_method)
+    state = pattern.simulate(branch_selector=pbs, measure_method=measure_method, rng=fx_rng)
     # Simulating the processed pattern with the measures drawn for the previous simulation
     pbs2 = FixedBranchSelector(measure_method.results)
-    state2 = presimulated_pattern.pattern.simulate(branch_selector=pbs2)
+    state2 = presimulated_pattern.pattern.simulate(branch_selector=pbs2, rng=fx_rng)
     assert compare_backend_results(state2, state) == pytest.approx(1)
 
 
@@ -92,13 +92,14 @@ def test_pauli_measurement_random_circuit(fx_bg: PCG64, jumps: int) -> None:
     pattern = circuit.transpile().pattern
     pattern.standardize()
     pattern.shift_signals()
+    pattern.infer_pauli_measurements()
     presimulated_pattern = presimulate_pauli(pattern, leave_input=False)
     pattern.remove_pauli_measurements()
     pattern.minimize_space()
     presimulated_pattern.pattern.minimize_space()
     # Since the patterns are deterministic, we do not need to select a particular branch
-    state = pattern.simulate()
-    state2 = presimulated_pattern.pattern.simulate()
+    state = pattern.simulate(rng=rng)
+    state2 = presimulated_pattern.pattern.simulate(rng=rng)
     assert compare_backend_results(state, state2) == pytest.approx(1)
 
 
@@ -112,6 +113,7 @@ def test_branch_selection(fx_bg: PCG64, jumps: int) -> None:
     pattern = circuit.transpile().pattern
     pattern.standardize()
     pattern.shift_signals()
+    pattern.infer_pauli_measurements()
     pattern_a = presimulate_pauli(pattern, leave_input=False)
     pattern_b = presimulate_pauli(pattern, leave_input=False, branch=pattern_a.results)
     assert list(pattern_a.pattern) == list(pattern_b.pattern)
@@ -127,11 +129,12 @@ def test_simulate_pauli_depolarising_noise(fx_bg: PCG64, jumps: int) -> None:
     pattern = circuit.transpile().pattern
     pattern.standardize()
     pattern.shift_signals()
+    pattern.infer_pauli_measurements()
     pattern = StandardizedPattern.from_pattern(pattern).perform_pauli_pushing().to_pattern()
     pauli_pattern, _non_pauli_pattern = cut_pattern(pattern)
     noise_model = DepolarisingNoiseModel()
     backend = StimBackend()
-    pauli_pattern.simulate(backend, noise_model=noise_model)
+    pauli_pattern.simulate(backend, noise_model=noise_model, rng=rng)
 
 
 def hpat() -> Pattern:
@@ -141,21 +144,21 @@ def hpat() -> Pattern:
     return circ.transpile().pattern
 
 
-def simulate_with_noise_model_to_density_matrix(pattern: Pattern, noise_model: NoiseModel) -> Matrix:
+def simulate_with_noise_model_to_density_matrix(pattern: Pattern, noise_model: NoiseModel, rng: Generator) -> Matrix:
     """Simulate noise with Stim and a density matrix."""
     backend = StimBackend()
-    pattern.simulate(backend=backend, noise_model=noise_model)
+    pattern.simulate(backend=backend, noise_model=noise_model, rng=rng)
     second_pattern = backend.to_pattern([], pattern.output_nodes)
-    state = second_pattern.simulate()
+    state = second_pattern.simulate(rng=rng)
     assert isinstance(state, Statevector)
     return outer(state.psi, state.psi.conj())
 
 
-def test_noisy_measure_confuse_hadamard() -> None:
+def test_noisy_measure_confuse_hadamard(fx_rng: Generator) -> None:
     """Test noise with Hadamard."""
     hadamard_pattern = hpat().infer_pauli_measurements()
     noise_model = DepolarisingNoiseModel(measure_error_prob=1.0)
-    rho = simulate_with_noise_model_to_density_matrix(hadamard_pattern, noise_model)
+    rho = simulate_with_noise_model_to_density_matrix(hadamard_pattern, noise_model, rng=fx_rng)
     # result should be |1>
     assert np.allclose(rho, np.array([[0.0, 0.0], [0.0, 1.0]]))
 
@@ -166,7 +169,7 @@ def test_noisy_measure_confuse_hadamard_random(fx_bg: PCG64, jumps: int) -> None
     rng = Generator(fx_bg.jumped(jumps))
     hadamard_pattern = hpat().infer_pauli_measurements()
     noise_model = DepolarisingNoiseModel(measure_error_prob=rng.random())
-    rho = simulate_with_noise_model_to_density_matrix(hadamard_pattern, noise_model)
+    rho = simulate_with_noise_model_to_density_matrix(hadamard_pattern, noise_model, rng=rng)
     assert np.allclose(rho, np.array([[1.0, 0.0], [0.0, 0.0]])) or np.allclose(
         rho,
         np.array([[0.0, 0.0], [0.0, 1.0]]),
