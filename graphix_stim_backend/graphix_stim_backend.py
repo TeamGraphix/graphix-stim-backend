@@ -513,7 +513,11 @@ def presimulate_pauli(
 ) -> PresimulatedPattern:
     """Return a pattern where Clifford measurements have been presimulated."""
     leave_nodes = set(pattern.input_nodes) if leave_input else None
-    pattern = StandardizedPattern.from_pattern(pattern).perform_pauli_pushing(leave_nodes, stacklevel=stacklevel + 1).to_pattern()
+    pattern = (
+        StandardizedPattern.from_pattern(pattern)
+        .perform_pauli_pushing(leave_nodes, stacklevel=stacklevel + 1)
+        .to_pattern()
+    )
     pauli_pattern, non_pauli_pattern = cut_pattern(pattern)
     backend = StimBackend(branch=branch)
     measure_method = DefaultMeasureMethod()
