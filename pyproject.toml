@@ -58,3 +58,7 @@ reportUnknownLambdaType = "error"
 reportUnknownMemberType = "information"
 reportUnknownParameterType = "error"
 reportUnknownVariableType = "information"
+
+[tool.uv.sources]
+# TeamGraphix/graphix#607: New base class Simulable
+graphix = { git = "https://github.com/TeamGraphix/graphix.git", rev = "refs/pull/607/head" }
