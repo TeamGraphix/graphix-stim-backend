@@ -10,13 +10,19 @@ maintainers = [
 ]
 license-files = ["LICENSE"]
 version = "1"
-dynamic = ["dependencies", "optional-dependencies"]
+dependencies = [
+    "graphix>=0.4",
+    "stim>=1.15,<2",
+]
 
-[tool.setuptools.dynamic]
-dependencies = { file = ["requirements.txt"] }
-
-[tool.setuptools.dynamic.optional-dependencies]
-dev = { file = ["requirements-dev.txt"] }
+[dependency-groups]
+dev = [
+    "mypy==1.19.1",
+    "pyright",
+    "ruff==0.14.14",
+    "nox==2025.5.1",
+    "pytest",
+]
 
 [tool.ruff]
 line-length = 120
@@ -58,3 +64,7 @@ reportUnknownLambdaType = "error"
 reportUnknownMemberType = "information"
 reportUnknownParameterType = "error"
 reportUnknownVariableType = "information"
+
+[tool.uv.sources]
+# TeamGraphix/graphix#607: New base class Simulable
+graphix = { git = "https://github.com/TeamGraphix/graphix.git", branch = "refs/pull/607/head" }
