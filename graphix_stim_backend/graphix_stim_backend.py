@@ -5,7 +5,7 @@ from __future__ import annotations
 import dataclasses
 from dataclasses import dataclass
 from enum import Enum
-from typing import TYPE_CHECKING, Literal
+from typing import TYPE_CHECKING, Literal, assert_never
 
 import networkx as nx
 import numpy as np
@@ -21,7 +21,7 @@ from graphix.sim.base_backend import Backend, Matrix
 from graphix.sim.statevec import Statevector
 from graphix.simulator import DefaultMeasureMethod
 from graphix.states import BasicStates, PlanarState, State
-from typing_extensions import assert_never, override
+from typing_extensions import override
 
 from graphix_stim_backend.single_pauli_noise_model import SinglePauliNoise
 
@@ -521,7 +521,7 @@ def presimulate_pauli(
     pauli_pattern, non_pauli_pattern = cut_pattern(pattern)
     backend = StimBackend(branch=branch)
     measure_method = DefaultMeasureMethod()
-    pauli_pattern.simulate(backend, measure_method=measure_method)
+    pauli_pattern.simulate(backend, measure_method=measure_method, optimized=False)
     output_node_set = set(pauli_pattern.output_nodes)
     input_nodes = [node for node in pattern.input_nodes if node in output_node_set]
     result_pattern = backend.to_pattern(input_nodes, non_pauli_pattern.input_nodes)

@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Literal
+from typing import TYPE_CHECKING, Literal, assert_never
 
 from graphix.channels import KrausChannel, KrausData
 from graphix.command import BaseM, CommandKind
@@ -13,7 +13,7 @@ from graphix.noise_models.noise_model import (
     NoiseModel,
 )
 from graphix.ops import Ops
-from typing_extensions import assert_never, override
+from typing_extensions import override
 
 if TYPE_CHECKING:
     from collections.abc import Iterable

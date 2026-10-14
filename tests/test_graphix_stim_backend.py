@@ -75,7 +75,8 @@ def test_simple(fx_rng: Generator) -> None:
     pbs = FixedBranchSelector(presimulated_pattern.results, RandomBranchSelector())
     # Instantiate the measure method to retrieve the measures of the non-Pauli nodes
     measure_method = DefaultMeasureMethod()
-    state = pattern.simulate(branch_selector=pbs, measure_method=measure_method, rng=fx_rng)
+    # `optimized=False` since branch selector can select non-zero branches for Pauli measurements
+    state = pattern.simulate(branch_selector=pbs, measure_method=measure_method, rng=fx_rng, optimized=False)
     # Simulating the processed pattern with the measures drawn for the previous simulation
     pbs2 = FixedBranchSelector(measure_method.results)
     state2 = presimulated_pattern.pattern.simulate(branch_selector=pbs2, rng=fx_rng)
