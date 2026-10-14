@@ -5,7 +5,7 @@ from __future__ import annotations
 import dataclasses
 from dataclasses import dataclass
 from enum import Enum
-from typing import TYPE_CHECKING, Literal
+from typing import TYPE_CHECKING, Literal, assert_never
 
 import networkx as nx
 import numpy as np
@@ -21,7 +21,7 @@ from graphix.sim.base_backend import Backend, Matrix
 from graphix.sim.statevec import Statevector
 from graphix.simulator import DefaultMeasureMethod
 from graphix.states import BasicStates, PlanarState, State
-from typing_extensions import assert_never, override
+from typing_extensions import override
 
 from graphix_stim_backend.single_pauli_noise_model import SinglePauliNoise
 
