@@ -11,7 +11,7 @@ maintainers = [
 license-files = ["LICENSE"]
 version = "1"
 dependencies = [
-    "graphix>=0.4",
+    "graphix>=0.4.1",
     "stim>=1.15,<2",
 ]
 
@@ -64,6 +64,3 @@ reportUnknownLambdaType = "error"
 reportUnknownMemberType = "information"
 reportUnknownParameterType = "error"
 reportUnknownVariableType = "information"
-
-[tool.uv.sources]
-graphix = { git = "https://github.com/TeamGraphix/graphix.git" }
